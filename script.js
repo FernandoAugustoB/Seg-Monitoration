@@ -1,8 +1,11 @@
 // --- Estado da Aplicação ---
-let operadores = JSON.parse(localStorage.getItem('nodu_operadores')) || ["FERNANDO"];
-let modelosConfig = JSON.parse(localStorage.getItem('nodu_templates')) || [];
+let operadores = JSON.parse(localStorage.getItem('operadores')) || ["FERNANDO"];
+let modelosConfig = JSON.parse(localStorage.getItem('templates')) || [];
 let camposTemporarios = []; // Usado durante a criação de um novo modelo
+let historicoGlobal = JSON.parse(localStorage.getItem('nodu_historico')) || {};
 let modeloAtivo = null;
+let modoEditor = false;
+let editandoId = null; // Guarda o ID do modelo que está sendo editado
 
 // --- Seletores ---
 const el = {
@@ -58,6 +61,8 @@ function init() {
     document.getElementById('btn-salvar-procedimento').onclick = salvarProcedimento;
     document.getElementById('btn-gerar').onclick = gerarRelatorio;
     document.getElementById('btn-copiar').onclick = copiarTexto;
+    document.getElementById('btn-backup').onclick = exportarTudo;
+    document.getElementById('btn-import').onclick = importarTudo;
 
     el.operador.onchange = trocarOperador;
     el.blocoNotas.oninput = salvarNotaPessoal;
@@ -69,11 +74,11 @@ function init() {
 function adicionarCampoAoModelo() {
     const label = document.getElementById('campo-label').value.trim();
     const type = document.getElementById('campo-type').value;
+    const autocomplete = document.getElementById('campo-autocomplete').checked; // Novo
     const id = label.toLowerCase().replace(/\s+/g, '_');
 
     if (label) {
-        camposTemporarios.push({ id, label, type });
-        document.getElementById('campo-label').value = '';
+        camposTemporarios.push({ id, label, type, autocomplete });
         renderizarCamposConfig();
     }
 }
@@ -96,9 +101,15 @@ function salvarProcedimento() {
     const nome = document.getElementById('model-nome').value.trim();
     const template = document.getElementById('model-template').value;
     const id = editandoId || nome.toLowerCase().replace(/\s+/g, '_');
+    const hasTemplate = document.getElementById('model-has-template').checked;
 
     if (nome && template && camposTemporarios.length > 0) {
-        const novoModelo = { id, nome, template, campos: [...camposTemporarios] };
+        const novoModelo = {
+            id,
+            nome,
+            template: hasTemplate ? template : null, // Se desativado, salva null
+            campos: [...camposTemporarios]
+        };
 
         if (editandoId) {
             // Atualiza modelo existente
@@ -109,7 +120,7 @@ function salvarProcedimento() {
             modelosConfig.push(novoModelo);
         }
 
-        localStorage.setItem('nodu_templates', JSON.stringify(modelosConfig));
+        localStorage.setItem('templates', JSON.stringify(modelosConfig));
 
         // Reset e UI
         editandoId = null;
@@ -140,7 +151,7 @@ function renderizarMenu() {
 window.excluirModelo = (id) => {
     if (confirm("Deseja apagar este procedimento permanentemente?")) {
         modelosConfig = modelosConfig.filter(m => m.id !== id);
-        localStorage.setItem('nodu_templates', JSON.stringify(modelosConfig));
+        localStorage.setItem('templates', JSON.stringify(modelosConfig));
         renderizarMenu();
         el.formContainer.classList.add('hidden');
     }
@@ -170,6 +181,10 @@ function carregarModelo(id) {
         div.innerHTML = label + input;
         el.camposDinamicos.appendChild(div);
         document.getElementById(`in-${campo.id}`).value = valorSalvo;
+        if (campo.autocomplete) {
+            inputElement.setAttribute('list', `list-${campo.id}`);
+            atualizarDatalists(campo.id);
+        }
     });
 
     el.formContainer.classList.remove('hidden');
@@ -189,7 +204,7 @@ function adicionarOperador() {
     const nome = el.inputNovoOp.value.trim().toUpperCase();
     if (nome && !operadores.includes(nome)) {
         operadores.push(nome);
-        localStorage.setItem('nodu_operadores', JSON.stringify(operadores));
+        localStorage.setItem('operadores', JSON.stringify(operadores));
         el.inputNovoOp.value = '';
         atualizarSelectOperadores();
         renderizarListaGerenciamento();
@@ -215,12 +230,19 @@ function gerarRelatorio() {
     let output = modeloAtivo.template;
     const op = el.operador.value;
     output = output.replace(/{{operador}}/g, op.toUpperCase());
-
+    
     modeloAtivo.campos.forEach(campo => {
         const val = document.getElementById(`in-${campo.id}`).value;
         const regex = new RegExp(`{{${campo.id}}}`, 'g');
         output = output.replace(regex, val);
     });
+    
+    alimentarHistorico();
+
+    if(!modeloAtivo.template) {
+        alert("Este formulário não possui template. Dados salvos apenas no histórico.");
+        return;
+    }
 
     el.textoFinal.innerText = output;
     el.resultadoContainer.classList.remove('hidden');
@@ -236,11 +258,6 @@ function copiarTexto(silencioso = false) {
         }
     });
 }
-
-// --- Novas Variáveis de Estado ---
-let modoEditor = false;
-let editandoId = null; // Guarda o ID do modelo que está sendo editado
-
 
 // --- Lógica de Edição ---
 function prepararEdicao(id) {
@@ -258,52 +275,101 @@ function prepararEdicao(id) {
 
 
 // --- Exportação Unificada (Backup) ---
-function exportarBackup() {
-    // Fernando, aqui exportamos TUDO: Operadores, Dados Salvos e Templates
-    const backupCompleto = {
-        operadores: operadores,
-        templates: modelosConfig,
-        dados: {}
-    };
-
-    // Pega todos os dados de preenchimento (autosave) do localStorage
-    Object.keys(localStorage).forEach(key => {
-        if (key !== 'nodu_operadores' && key !== 'nodu_templates') {
-            backupCompleto.dados[key] = localStorage.getItem(key);
+function exportarTudo() {
+    try {
+        const backup = {};
+        // Itera por todas as chaves do localStorage (Dados, Operadores e Templates)
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            backup[key] = localStorage.getItem(key);
         }
-    });
 
-    const blob = new Blob([JSON.stringify(backupCompleto)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `NEWSEG_CONFIG_TOTAL_${new Date().toLocaleDateString('pt-BR')}.json`;
-    a.click();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", `NEWSEG_FULL_BACKUP_${new Date().getTime()}.json`);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    } catch (e) {
+        alert("Erro ao gerar backup: " + e);
+    }
 }
 
-function importarBackup() {
+function importarTudo() {
     const input = document.createElement('input');
     input.type = 'file';
+    input.accept = '.json';
+
     input.onchange = e => {
+        const file = e.target.files[0];
         const reader = new FileReader();
+
         reader.onload = event => {
             try {
-                const data = JSON.parse(event.target.result);
+                const backup = JSON.parse(event.target.result);
 
-                if (data.operadores) localStorage.setItem('nodu_operadores', JSON.stringify(data.operadores));
-                if (data.templates) localStorage.setItem('nodu_templates', JSON.stringify(data.templates));
-                if (data.dados) {
-                    Object.keys(data.dados).forEach(k => localStorage.setItem(k, data.dados[k]));
+                if (confirm("Isso irá substituir TODOS os dados e modelos atuais. Deseja continuar?")) {
+                    localStorage.clear(); // Limpa o lixo atual
+
+                    Object.keys(backup).forEach(key => {
+                        localStorage.setItem(key, backup[key]);
+                    });
+
+                    alert("Sincronização concluída com sucesso! O sistema irá reiniciar.");
+                    location.reload();
                 }
-
-                alert('Sincronização Total Concluída!');
-                location.reload();
             } catch (err) {
-                alert("Erro ao ler arquivo de backup.");
+                alert("Erro: Arquivo JSON inválido ou corrompido.");
             }
         };
-        reader.readAsText(e.target.files[0]);
+        reader.readAsText(file);
     };
     input.click();
+}
+
+// --- Função para Gerar/Atualizar os Datalists (Auto-complete) ---
+function atualizarDatalists(campoId) {
+    let datalist = document.getElementById(`list-${campoId}`);
+    if (!datalist) {
+        datalist = document.createElement('datalist');
+        datalist.id = `list-${campoId}`;
+        document.body.appendChild(datalist);
+    }
+
+    const sugestoes = historicoGlobal[campoId] || [];
+    datalist.innerHTML = sugestoes.map(s => `<option value="${s}">`).join('');
+}
+
+// --- Otimização: Salvar no Histórico apenas no CLICK de Gerar/Copiar ---
+function alimentarHistorico() {
+    modeloAtivo.campos.forEach(campo => {
+        if (campo.autocomplete) {
+            const val = document.getElementById(`in-${campo.id}`).value.trim();
+            if (val && val.length > 2) { // Evita palavras muito curtas
+                if (!historicoGlobal[campo.id]) historicoGlobal[campo.id] = [];
+
+                // Adiciona se não existir e mantém apenas as últimas 50 entradas para performance
+                if (!historicoGlobal[campo.id].includes(val)) {
+                    historicoGlobal[campo.id].unshift(val);
+                    historicoGlobal[campo.id] = historicoGlobal[campo.id].slice(0, 50);
+                }
+            }
+        }
+    });
+    localStorage.setItem('nodu_historico', JSON.stringify(historicoGlobal));
+}
+
+// --- No gerarRelatorio ---
+function gerarRelatorio() {
+    alimentarHistorico(); // Salva os dados no histórico global
+
+    if (!modeloAtivo.template) {
+        alert("Este formulário não possui template. Dados salvos apenas no histórico.");
+        return;
+    }
+
+    // ... lógica normal de gerar o texto ...
 }
 
 // Iniciar Sistema

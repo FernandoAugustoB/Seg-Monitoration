@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="p-4 md:p-8 font-sans w-full">
+<body class="p-4 md:p-8 font-sans w-full h-full">
 
     <div class="max-w-7xl mx-auto">
         <header
@@ -126,7 +126,7 @@
                         Relatório Copiado
                     </button>
                 </div>
-            </main>
+            </main> 
         </div>
     </div>
     <div id="modal-modelos" class="fixed inset-0 bg-black/90 flex items-center justify-center hidden z-50 p-4">
@@ -141,11 +141,15 @@
                 <input type="text" id="model-nome" placeholder="NOME DO PROCEDIMENTO (EX: INÍCIO DE PLANTÃO)"
                     class="w-full bg-black border border-neutral-800 p-3 text-xs text-white focus:outline-none font-mono uppercase">
 
-                <div class="bg-neutral-900 p-4 border border-neutral-800">
-                    <label class="block text-[10px] font-bold text-neutral-500 mb-2 uppercase">Template do Relatório
-                        (Use {{nome_do_campo}})</label>
-                    <textarea id="model-template" placeholder="Ex: *INICIO DE PLANTÃO* \n Operador: {{operador}}"
-                        class="w-full h-32 bg-black border border-neutral-800 p-2 text-xs text-neutral-300 font-mono focus:outline-none"></textarea>
+                <div class="flex items-center gap-3 bg-neutral-900 p-3 mb-4 border border-neutral-800">
+                    <span class="text-[10px] font-bold text-neutral-400 uppercase">Utilizar Template de
+                        Relatório?</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="model-has-template" class="sr-only peer" checked>
+                        <div
+                            class="w-8 h-4 bg-neutral-800 rounded-none peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-500 after:rounded-none after:h-3 after:w-[14px] after:transition-all peer-checked:bg-yellow-400 peer-checked:after:bg-black">
+                        </div>
+                    </label>
                 </div>
 
                 <div class="bg-neutral-900 p-4 border border-neutral-800">
