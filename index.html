@@ -126,7 +126,7 @@
                         Relatório Copiado
                     </button>
                 </div>
-            </main> 
+            </main>
         </div>
     </div>
     <div id="modal-modelos" class="fixed inset-0 bg-black/90 flex items-center justify-center hidden z-50 p-4">
@@ -152,24 +152,38 @@
                     </label>
                 </div>
 
+                <div class="bg-neutral-900 p-4 border border-neutral-800" id="template-campo">
+                    <label class="block text-[10px] font-bold text-neutral-500 mb-2 uppercase">Template do Relatório
+                        (Use {{nome_do_campo}})</label>
+                    <textarea id="model-template" placeholder="Ex: *INICIO DE PLANTÃO* \n Operador: {{operador}}"
+                        class="w-full h-32 bg-black border border-neutral-800 p-2 text-xs text-neutral-300 font-mono focus:outline-none"></textarea>
+                </div>
+
                 <div class="bg-neutral-900 p-4 border border-neutral-800">
                     <label
                         class="block text-[10px] font-bold text-neutral-500 mb-2 uppercase text-yellow-400">Configurar
                         Campos</label>
                     <div id="lista-campos-config" class="space-y-2 mb-4">
                     </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="campo-label" placeholder="Label (Ex: Tático)"
-                            class="flex-1 bg-black border border-neutral-800 p-2 text-[10px] text-white focus:outline-none font-mono">
-                        <select id="campo-type"
-                            class="bg-black border border-neutral-800 p-2 text-[10px] text-yellow-400 font-mono">
-                            <option value="text">TEXTO CURTO</option>
-                            <option value="textarea">TEXTO LONGO</option>
-                            <option value="number">NÚMERO</option>
-                        </select>
+                    <div class="flex flex-col gap-2 bg-neutral-900 p-3">
+                        <div class="flex gap-2">
+                            <input type="text" id="campo-label" placeholder="Label do Campo"
+                                class="flex-1 bg-black border border-neutral-800 p-2 text-[10px] text-white focus:outline-none font-mono">
+                            <select id="campo-type"
+                                class="bg-black border border-neutral-800 p-2 text-[10px] text-yellow-400 font-mono">
+                                <option value="text">TEXTO</option>
+                                <option value="textarea">ÁREA DE TEXTO</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="campo-autocomplete" class="w-3 h-3 accent-yellow-400">
+                            <label for="campo-autocomplete"
+                                class="text-[9px] font-bold text-neutral-500 uppercase">Habilitar Auto-Completar
+                                Histórico</label>
+                        </div>
                         <button id="btn-add-campo"
-                            class="bg-neutral-700 text-white px-4 text-[10px] font-bold uppercase hover:bg-neutral-600">Add
-                            Campo</button>
+                            class="bg-neutral-700 text-white py-2 text-[10px] font-bold uppercase hover:bg-neutral-600 transition-all">+
+                            Add Campo</button>
                     </div>
                 </div>
 

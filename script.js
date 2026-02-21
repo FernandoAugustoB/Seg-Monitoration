@@ -35,8 +35,17 @@ function init() {
     document.getElementById('switch-editor').onchange = (e) => {
         modoEditor = e.target.checked;
         document.getElementById('btn-abrir-config-modelos').classList.toggle('hidden', !modoEditor);
-        renderizarMenu(); // Re-renderiza para mostrar/esconder botões de edição
+        renderizarMenu();
     };
+
+    document.getElementById('model-has-template').onchange = (e) => {
+        const templateInput = document.getElementById('template-campo');
+        if (e.target.checked) {
+            templateInput.classList.remove('hidden');
+        } else {
+            templateInput.classList.add('hidden');
+        }
+    }
 
     // Listeners Gerais
     document.getElementById('btn-gerenciar-ops').onclick = () => el.modalOps.classList.remove('hidden');
@@ -101,7 +110,9 @@ function salvarProcedimento() {
     const nome = document.getElementById('model-nome').value.trim();
     const template = document.getElementById('model-template').value;
     const id = editandoId || nome.toLowerCase().replace(/\s+/g, '_');
-    const hasTemplate = document.getElementById('model-has-template').checked;
+    const hasTemplate = document.getElementById('model-has-template').checked; // Esconde o botão de adicionar operador durante a configuração
+
+    document.getElementById('btn-add-op').classList.add('hidden');
 
     if (nome && template && camposTemporarios.length > 0) {
         const novoModelo = {
