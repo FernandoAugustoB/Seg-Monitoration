@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Monitoramento - Sistema de Notas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; }
+        .card { background-color: #1e293b; border: 1px solid #334155; }
+        textarea { resize: none; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8 flex justify-between items-center border-b border-slate-700 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-cyan-400">Nodu Notes 🧙🏼‍♂️</h1>
+                <p class="text-slate-400 text-sm">Controle de Plantão - Fernando Augusto</p>
+            </div>
+            <div class="space-x-2">
+                <button onclick="exportarBackup()" class="bg-slate-700 hover:bg-slate-600 text-xs py-1 px-3 rounded">Backup</button>
+                <button onclick="importarBackup()" class="bg-slate-700 hover:bg-slate-600 text-xs py-1 px-3 rounded">Importar</button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <aside class="space-y-2" id="menu-modelos">
+                <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Modelos</h2>
+                </aside>
+
+            <main class="md:col-span-2 space-y-4">
+                <div id="formulario-container" class="card p-6 rounded-lg shadow-xl hidden">
+                    <h2 id="form-titulo" class="text-xl font-bold mb-4 text-cyan-300"></h2>
+                    <div id="campos-dinamicos" class="space-y-4"></div>
+                    
+                    <div class="mt-6 flex space-x-2">
+                        <button onclick="gerarRelatorio()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded transition">
+                            Gerar Texto
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resultado-container" class="card p-6 rounded-lg shadow-xl hidden border-t-4 border-cyan-500">
+                    <h3 class="text-sm font-bold text-slate-400 mb-2 uppercase text-center">Resultado para Copiar</h3>
+                    <pre id="texto-final" class="bg-slate-900 p-4 rounded text-sm whitespace-pre-wrap font-mono text-slate-300"></pre>
+                    <button onclick="copiarTexto()" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded transition">
+                        Copiar para WhatsApp
+                    </button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Configuração Modular de Modelos (Pode ser expandida aqui)
+        const modelosConfig = [
+            {
+                id: 'inicio',
+                nome: 'Início de Plantão',
+                template: `⏯️⏯️⏯️⏯️⏯️⏯️⏯️⏯️⏯️⏯️⏯️\n-----------------------------------------------------------\n*INICIO DE PLANTÃO PUBLICOS/PRIVADOS*\n*{{data}}*\n*Operador:* {{operador}}\n*Tático:* {{tatico}}\n*Sistema:* Ok\n*Telefone:* Ok\n*Volume do celular e computador:* {{volume}}%\n\nClientes privados/Públicos Sem Comunicação:\n{{clientes}}`,
+                campos: [
+                    { id: 'data', label: 'Data', type: 'text', default: new Date().toLocaleDateString('pt-BR') },
+                    { id: 'operador', label: 'Operador', type: 'text', default: 'Fernando' },
+                    { id: 'tatico', label: 'Tático', type: 'text' },
+                    { id: 'volume', label: 'Volume (%)', type: 'number', default: '76' },
+                    { id: 'clientes', label: 'Clientes s/ Com. (Copie aqui)', type: 'textarea' }
+                ]
+            },
+            {
+                id: 'rondas',
+                nome: 'Rondas e Fechas',
+                template: `🏍️🏍️🏍️🏍️🏍️🏍️🏍️🏍️🏍️🏍️🏍️\n------------------------------------------------------------\n*RONDAS E FECHAS*\n*{{data}}*\n*Operador:* {{operador}}\n*Tático:* {{tatico}}\n\n{{locais}}`,
+                campos: [
+                    { id: 'data', label: 'Data', type: 'text', default: new Date().toLocaleDateString('pt-BR').substring(0,5) },
+                    { id: 'operador', label: 'Operador', type: 'text', default: 'Fernando' },
+                    { id: 'tatico', label: 'Tático', type: 'text' },
+                    { id: 'locais', label: 'Locais e Horários', type: 'textarea' }
+                ]
+            }
+        ];
+
+        let modeloAtivo = null;
+
+        // Inicializar Menu
+        const menu = document.getElementById('menu-modelos');
+        modelosConfig.forEach(m => {
+            const btn = document.createElement('button');
+            btn.className = "w-full text-left p-3 rounded bg-slate-800 hover:bg-slate-700 transition border-l-4 border-transparent hover:border-cyan-400 mb-2";
+            btn.innerText = m.nome;
+            btn.onclick = () => carregarModelo(m.id);
+            menu.appendChild(btn);
+        });
+
+        function carregarModelo(id) {
+            modeloAtivo = modelosConfig.find(m => m.id === id);
+            document.getElementById('form-titulo').innerText = modeloAtivo.nome;
+            const container = document.getElementById('campos-dinamicos');
+            container.innerHTML = '';
+
+            modeloAtivo.campos.forEach(campo => {
+                const div = document.createElement('div');
+                const label = `<label class="block text-xs font-bold text-slate-400 mb-1 uppercase">${campo.label}</label>`;
+                const input = campo.type === 'textarea' 
+                    ? `<textarea id="input-${campo.id}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white h-24"></textarea>`
+                    : `<input type="${campo.type}" id="input-${campo.id}" value="${campo.default || ''}" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white">`;
+                
+                div.innerHTML = label + input;
+                container.appendChild(div);
+            });
+
+            document.getElementById('formulario-container').classList.remove('hidden');
+            document.getElementById('resultado-container').classList.add('hidden');
+        }
+
+        function gerarRelatorio() {
+            let texto = modeloAtivo.template;
+            modeloAtivo.campos.forEach(campo => {
+                const valor = document.getElementById(`input-${campo.id}`).value;
+                texto = texto.replace(`{{${campo.id}}}`, valor);
+            });
+
+            document.getElementById('texto-final').innerText = texto;
+            document.getElementById('resultado-container').classList.remove('hidden');
+        }
+
+        function copiarTexto() {
+            const texto = document.getElementById('texto-final').innerText;
+            navigator.clipboard.writeText(texto);
+            alert('Copiado para o clipboard!');
+        }
+
+        // Sistema de Backup
+        function exportarBackup() {
+            const data = JSON.stringify(localStorage);
+            const blob = new Blob([data], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_nodu_${new Date().getTime()}.json`;
+            a.click();
+        }
+
+        function importarBackup() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = event => {
+                    const data = JSON.parse(event.target.result);
+                    Object.keys(data).forEach(key => localStorage.setItem(key, data[key]));
+                    alert('Backup restaurado! Recarregue a página.');
+                    location.reload();
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+    </script>
+</body>
+</html>
