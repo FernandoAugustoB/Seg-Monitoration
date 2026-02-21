@@ -1,235 +1,158 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Monitoramento</title>
+    <title>Controle de Plantão</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #000000; color: #d1d5db; scroll-behavior: smooth; }
-        .card { background-color: #111111; border: 1px solid #262626; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #404040; border-radius: 4px; }
-        .active-model { border-left: 4px solid #facc15 !important; background-color: #171717 !important; color: #facc15; }
-        input:focus, textarea:focus { border-color: #facc15 !important; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="p-4 md:p-8 font-sans">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b border-neutral-800 pb-6 gap-4">
+    <div class="max-w-7xl mx-auto">
+        <header
+            class="header-container mb-8 flex flex-col md:flex-row justify-between items-center border-b border-neutral-800 pb-6 gap-4">
             <div>
                 <h1 class="text-2xl font-black text-yellow-400 tracking-tighter uppercase">New Seg</h1>
-                <p class="text-neutral-500 text-xs font-mono uppercase tracking-widest">Controle de Plantão</p>
+                <p class="text-neutral-500 text-[10px] font-mono uppercase tracking-[0.3em]">Controle de Plantão</p>
             </div>
-            
+
             <div class="flex items-center gap-4">
                 <div class="text-right">
-                    <label class="block text-[10px] uppercase font-bold text-neutral-600">Operador Ativo</label>
-                    <select id="select-operador" onchange="trocarOperador()" class="bg-neutral-900 text-yellow-400 border border-neutral-800 rounded px-3 py-1 font-bold outline-none cursor-pointer">
-                        <option value="Fernando">Fernando</option>
-                        <option value="Cezar">Cezar</option>
-                        <option value="Bruno">Bruno</option>
-                        <option value="Reginaldo">Reginaldo</option>
-                        <option value="Cassiane">Cassiane</option>
-                    </select>
+                    <div class="flex items-center gap-4">
+                        <div class="text-left">
+                            <label
+                                class="block text-[10px] uppercase font-bold text-neutral-600 tracking-tighter">Operador
+                                Ativo</label>
+                            <div class="flex gap-1">
+                                <select id="select-operador"
+                                    class="bg-neutral-900 text-yellow-400 border border-neutral-800 rounded-none px-3 py-1 font-bold outline-none cursor-pointer text-xs">
+                                </select>
+                                <button id="btn-gerenciar-ops"
+                                    class="bg-neutral-800 hover:bg-neutral-700 px-2 text-yellow-400"
+                                    title="Gerenciar Operadores">⚙️</button>
+                            </div>
+                        </div>
+                    </div>
+ 
+                    <div id="modal-ops"
+                        class="fixed inset-0 bg-black/90 flex items-center justify-center hidden z-50 p-4">
+                        <div class="card w-full max-w-md p-6 border-yellow-400/30">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2
+                                    class="text-yellow-400 font-black uppercase tracking-widest text-sm italic underline">
+                                    Gerenciar Operadores</h2>
+                                <button id="btn-fechar-modal" class="text-neutral-500 hover:text-white">✕</button>
+                            </div>
+
+                            <div class="flex gap-2 mb-6">
+                                <input type="text" id="input-novo-op" placeholder="NOME DO OPERADOR"
+                                    class="flex-1 bg-black border border-neutral-800 p-2 text-xs text-white focus:outline-none font-mono uppercase">
+                                <button id="btn-add-op"
+                                    class="bg-yellow-400 text-black px-4 font-black text-xs uppercase hover:bg-yellow-300">Add</button>
+                            </div>
+
+                            <ul id="lista-ops-gerenciamento" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex gap-2 border-l border-neutral-800 pl-4">
-                    <button onclick="exportarBackup()" class="bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-yellow-400 text-[10px] py-1 px-3 rounded uppercase font-bold transition-all">Backup</button>
-                    <button onclick="importarBackup()" class="bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-yellow-400 text-[10px] py-1 px-3 rounded uppercase font-bold transition-all">Importar</button>
+                <div class="flex gap-2 border-l border-neutral-800 pl-4 text-neutral-400">
+                    <button id="btn-backup" class="btn-util">Backup</button>
+                    <button id="btn-import" class="btn-util">Importar</button>
                 </div>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <aside class="lg:col-span-3 space-y-2">
-                <h2 class="text-[10px] font-bold text-neutral-600 uppercase tracking-[0.2em] mb-3">Procedimentos</h2>
-                <div id="menu-modelos" class="flex flex-col gap-2"></div>
+            <aside class="lg:col-span-3">
+                <h2 class="section-title">Procedimentos</h2>
+                <nav id="menu-modelos" class="flex flex-col gap-2"></nav>
             </aside>
 
             <main class="lg:col-span-6 space-y-6">
-                <div id="formulario-container" class="card p-6 rounded-none shadow-2xl hidden relative">
-                    <div id="badge-autosave" class="absolute top-2 right-2 text-[10px] text-yellow-500 opacity-0 transition-opacity font-mono">SYSTEM READY // AUTOSAVED</div>
-                    <h2 id="form-titulo" class="text-xl font-black mb-6 text-white uppercase tracking-tight border-b border-neutral-800 pb-2"></h2>
+                <div id="formulario-container" class="card p-6 hidden relative">
+                    <div id="badge-autosave" class="autosave-badge">SYSTEM READY // AUTOSAVED</div>
+                    <h2 id="form-titulo"
+                        class="text-xl font-black mb-6 text-white uppercase tracking-tight border-b border-neutral-800 pb-2 font-mono">
+                    </h2>
+
                     <div id="campos-dinamicos" class="space-y-4"></div>
-                    
-                    <button onclick="gerarRelatorio()" class="w-full mt-6 bg-yellow-400 hover:bg-yellow-300 text-black font-black py-4 rounded-none transition-all uppercase tracking-widest text-sm">
-                        Gerar Texto para WhatsApp
+
+                    <button id="btn-gerar"
+                        class="w-full mt-6 bg-yellow-400 hover:bg-yellow-300 text-black font-black py-4 uppercase tracking-widest text-xs transition-all">
+                        Copiar Relatório
                     </button>
                 </div>
 
-                <div id="resultado-container" class="card p-6 rounded-none hidden border-t-4 border-yellow-400">
-                    <h3 class="text-[10px] font-bold text-neutral-500 mb-2 uppercase tracking-widest text-center italic font-mono">Output Log</h3>
-                    <pre id="texto-final" class="bg-black p-4 rounded-none text-sm whitespace-pre-wrap font-mono text-neutral-300 border border-neutral-800"></pre>
-                    <button onclick="copiarTexto()" class="w-full mt-4 bg-neutral-100 hover:bg-white text-black font-black py-4 rounded-none transition-all uppercase tracking-widest text-sm">
-                        Copiar Relatório
+                <div id="resultado-container" class="card p-6 hidden border-t-4 border-yellow-400">
+                    <h3
+                        class="text-[10px] font-bold text-neutral-500 mb-2 uppercase tracking-widest text-center italic font-mono">
+                        Output Log</h3>
+                    <pre id="texto-final"
+                        class="bg-black p-4 text-sm whitespace-pre-wrap font-mono text-neutral-300 border border-neutral-800"></pre>
+                    <button id="btn-copiar"
+                        class="w-full mt-4 bg-white hover:bg-neutral-200 text-black font-black py-4 uppercase tracking-widest text-xs transition-all">
+                        Relatório Copiado
                     </button>
                 </div>
             </main>
 
             <aside class="lg:col-span-3">
-                <div class="card p-4 rounded-none sticky top-8">
-                    <h2 class="text-[10px] font-bold text-neutral-600 uppercase tracking-[0.2em] mb-3 flex justify-between items-center">
+                <div class="card p-4 sticky top-8">
+                    <h2 class="section-title flex justify-between items-center">
                         <span>📓 Notas Pessoais</span>
-                        <span id="label-operador-nota" class="text-yellow-500 font-mono"></span>
+                        <span id="label-operador-nota" class="text-yellow-500 font-mono lowercase"></span>
                     </h2>
-                    <textarea id="bloco-notas" oninput="salvarNotaPessoal()" placeholder="Buffer de anotações rápidas..." 
-                        class="w-full h-[500px] bg-black border border-neutral-800 rounded-none p-3 text-sm text-neutral-400 focus:outline-none transition-all font-mono"></textarea>
+                    <textarea id="bloco-notas" placeholder="Anotações rápidas..." class="textarea-buffer"></textarea>
                 </div>
             </aside>
         </div>
     </div>
+    <div id="modal-modelos" class="fixed inset-0 bg-black/90 flex items-center justify-center hidden z-50 p-4">
+    <div class="card w-full max-w-2xl p-6 border-yellow-400/30 overflow-y-auto max-h-[90vh]">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-yellow-400 font-black uppercase tracking-widest text-sm italic underline">Estruturar Procedimentos</h2>
+            <button id="btn-fechar-modal-modelos" class="text-neutral-500 hover:text-white">✕</button>
+        </div>
 
-    <script>
-        const modelosConfig = [
-            {
-                id: 'inicio',
-                nome: 'Início de Plantão',
-                template: `⏯️⏯️⏯️⏯️⏯️⏯️⏯️⏯️⏯️⏯️⏯️\n-----------------------------------------------------------\n*INICIO DE PLANTÃO PUBLICOS/PRIVADOS*\n*{{data}}*\n*Operador:* {{operador}}\n*Tático:* {{tatico}}\n*Sistema:* Ok\n*Telefone:* Ok\n*Volume do celular e computador:* {{volume}}%\n\nClientes sem Comunicação:\n{{clientes}}`,
-                campos: [
-                    { id: 'data', label: 'Data', type: 'text', default: new Date().toLocaleDateString('pt-BR') },
-                    { id: 'tatico', label: 'Tático de Turno', type: 'text' },
-                    { id: 'volume', label: 'Volume (%)', type: 'number', default: '76' },
-                    { id: 'clientes', label: 'Clientes/Ocorrências', type: 'textarea' }
-                ]
-            },
-            {
-                id: 'câmeras',
-                nome: 'Câmeras Offline',
-                template: `📷📷📷📷📷📷📷📷📷📷📷📷\n------------------------------------------------------------\n*CONTROLE DE CÂMERAS*\n*{{data}}*\n*Status Geral:* {{status}}\n\n*PRIVADAS:* {{privadas}}\n*PÚBLICAS:* {{publicas}}\n\nObs: {{obs}}`,
-                campos: [
-                    { id: 'data', label: 'Data', type: 'text', default: new Date().toLocaleDateString('pt-BR') },
-                    { id: 'status', label: 'Status Sistema', type: 'text', default: 'OK' },
-                    { id: 'privadas', label: 'Câmeras Privadas Off', type: 'textarea' },
-                    { id: 'publicas', label: 'Câmeras Públicas Off', type: 'textarea' },
-                    { id: 'obs', label: 'Observações Gerais', type: 'textarea' }
-                ]
-            },
-            {
-                id: 'rondas',
-                nome: 'Rondas e Fechas',
-                template: `🏍️🏍️🏍️🏍️🏍️🏍️🏍️🏍️🏍️🏍️🏍️\n------------------------------------------------------------\n*RONDAS E FECHAS*\n*{{data}}*\n*Operador:* {{operador}}\n*Tático:* {{tatico}}\n\n{{locais}}`,
-                campos: [
-                    { id: 'data', label: 'Data', type: 'text', default: new Date().toLocaleDateString('pt-BR').substring(0,5) },
-                    { id: 'tatico', label: 'Tático Responsável', type: 'text' },
-                    { id: 'locais', label: 'Relatório das Rondas', type: 'textarea' }
-                ]
-            }
-        ];
+        <div class="space-y-4">
+            <input type="text" id="model-nome" placeholder="NOME DO PROCEDIMENTO (EX: INÍCIO DE PLANTÃO)" class="w-full bg-black border border-neutral-800 p-3 text-xs text-white focus:outline-none font-mono uppercase">
+            
+            <div class="bg-neutral-900 p-4 border border-neutral-800">
+                <label class="block text-[10px] font-bold text-neutral-500 mb-2 uppercase">Template do Relatório (Use {{nome_do_campo}})</label>
+                <textarea id="model-template" placeholder="Ex: *INICIO DE PLANTÃO* \n Operador: {{operador}}" class="w-full h-32 bg-black border border-neutral-800 p-2 text-xs text-neutral-300 font-mono focus:outline-none"></textarea>
+            </div>
 
-        let modeloAtivo = null;
+            <div class="bg-neutral-900 p-4 border border-neutral-800">
+                <label class="block text-[10px] font-bold text-neutral-500 mb-2 uppercase text-yellow-400">Configurar Campos</label>
+                <div id="lista-campos-config" class="space-y-2 mb-4">
+                    </div> 
+                <div class="flex gap-2">
+                    <input type="text" id="campo-label" placeholder="Label (Ex: Tático)" class="flex-1 bg-black border border-neutral-800 p-2 text-[10px] text-white focus:outline-none font-mono">
+                    <select id="campo-type" class="bg-black border border-neutral-800 p-2 text-[10px] text-yellow-400 font-mono">
+                        <option value="text">TEXTO CURTO</option>
+                        <option value="textarea">TEXTO LONGO</option>
+                        <option value="number">NÚMERO</option>
+                    </select>
+                    <button id="btn-add-campo" class="bg-neutral-700 text-white px-4 text-[10px] font-bold uppercase hover:bg-neutral-600">Add Campo</button>
+                </div>
+            </div>
 
-        function trocarOperador() {
-            const op = document.getElementById('select-operador').value;
-            document.getElementById('label-operador-nota').innerText = `[${op}]`;
-            const notaSalva = localStorage.getItem(`${op}_notas_pessoais`);
-            document.getElementById('bloco-notas').value = notaSalva || "";
-            if(modeloAtivo) carregarModelo(modeloAtivo.id);
-        }
+            <button id="btn-salvar-procedimento" class="w-full bg-yellow-400 text-black font-black py-3 uppercase tracking-widest text-xs hover:bg-yellow-300 transition-all">
+                Salvar Procedimento Completo
+            </button>
+        </div>
+    </div>
+</div>
 
-        function salvarNotaPessoal() {
-            const op = document.getElementById('select-operador').value;
-            const texto = document.getElementById('bloco-notas').value;
-            localStorage.setItem(`${op}_notas_pessoais`, texto);
-        }
+<button id="btn-abrir-config-modelos" class="fixed bottom-4 left-4 bg-neutral-900 border border-neutral-800 p-3 rounded-full hover:border-yellow-400 transition-all z-40 text-xs text-yellow-400 font-mono">
+    ⚙️ MODELOS
+</button>
 
-        function initMenu() {
-            const menu = document.getElementById('menu-modelos');
-            modelosConfig.forEach(m => {
-                const btn = document.createElement('button');
-                btn.id = `btn-${m.id}`;
-                btn.className = "w-full text-left p-3 rounded-none bg-neutral-900 hover:bg-neutral-800 transition-all border-l-4 border-transparent mb-2 text-[11px] font-bold uppercase tracking-wider text-neutral-400";
-                btn.innerText = m.nome;
-                btn.onclick = () => carregarModelo(m.id);
-                menu.appendChild(btn);
-            });
-        }
-
-        function carregarModelo(id) {
-            modeloAtivo = modelosConfig.find(m => m.id === id);
-            const op = document.getElementById('select-operador').value;
-            document.querySelectorAll('#menu-modelos button').forEach(b => b.classList.remove('active-model'));
-            document.getElementById(`btn-${id}`).classList.add('active-model');
-            document.getElementById('form-titulo').innerText = modeloAtivo.nome;
-            const container = document.getElementById('campos-dinamicos');
-            container.innerHTML = '';
-
-            modeloAtivo.campos.forEach(campo => {
-                const storageKey = `${op}_${id}_${campo.id}`;
-                const valorSalvo = localStorage.getItem(storageKey) || campo.default || '';
-                const div = document.createElement('div');
-                div.innerHTML = `<label class="block text-[10px] font-black text-neutral-600 mb-1 uppercase tracking-widest">${campo.label}</label>` + 
-                    (campo.type === 'textarea' 
-                    ? `<textarea id="input-${campo.id}" oninput="autosave('${campo.id}')" class="w-full bg-black border border-neutral-800 rounded-none p-3 text-white h-24 focus:outline-none font-mono text-sm"></textarea>`
-                    : `<input type="${campo.type}" id="input-${campo.id}" oninput="autosave('${campo.id}')" value="${valorSalvo}" class="w-full bg-black border border-neutral-800 rounded-none p-3 text-white focus:outline-none font-mono text-sm">`);
-                container.appendChild(div);
-                if(campo.type === 'textarea') document.getElementById(`input-${campo.id}`).value = valorSalvo;
-            });
-
-            document.getElementById('formulario-container').classList.remove('hidden');
-            document.getElementById('resultado-container').classList.add('hidden');
-        }
-
-        function autosave(campoId) {
-            const op = document.getElementById('select-operador').value;
-            const val = document.getElementById(`input-${campoId}`).value;
-            localStorage.setItem(`${op}_${modeloAtivo.id}_${campoId}`, val);
-            const badge = document.getElementById('badge-autosave');
-            badge.style.opacity = '1';
-            setTimeout(() => badge.style.opacity = '0', 800);
-        }
-
-        function gerarRelatorio() {
-            let texto = modeloAtivo.template;
-            const op = document.getElementById('select-operador').value;
-            texto = texto.replace('{{operador}}', op.toUpperCase());
-            modeloAtivo.campos.forEach(campo => {
-                const valor = document.getElementById(`input-${campo.id}`).value;
-                texto = texto.replace(`{{${campo.id}}}`, valor);
-            });
-            document.getElementById('texto-final').innerText = texto;
-            document.getElementById('resultado-container').classList.remove('hidden');
-            document.getElementById('resultado-container').scrollIntoView();
-        }
-
-        function copiarTexto() {
-            const texto = document.getElementById('texto-final').innerText;
-            navigator.clipboard.writeText(texto).then(() => {
-                const btn = event.target;
-                btn.innerText = "✓ COPIADO COM SUCESSO";
-                setTimeout(() => btn.innerText = "Copiar Relatório", 2000);
-            });
-        }
-
-        function exportarBackup() {
-            const data = JSON.stringify(localStorage);
-            const blob = new Blob([data], {type: 'application/json'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `nodu_backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-        }
-
-        function importarBackup() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.onchange = e => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = event => {
-                    const data = JSON.parse(event.target.result);
-                    Object.keys(data).forEach(key => localStorage.setItem(key, data[key]));
-                    alert('Sincronização concluída!');
-                    location.reload();
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        }
-
-        initMenu();
-        trocarOperador();
-    </script>
+    <script src="script.js"></script>
 </body>
+
 </html>
