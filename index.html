@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="p-4 md:p-8 font-sans">
+<body class="p-4 md:p-8 font-sans w-full">
 
     <div class="max-w-7xl mx-auto">
         <header
@@ -59,26 +59,37 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-2 border-l border-neutral-800 pl-4 text-neutral-400">
-                    <button id="btn-backup" class="btn-util">Backup</button>
-                    <button id="btn-import" class="btn-util">Importar</button>
-                </div>
             </div>
-            <div class="flex items-center gap-6 border-l border-neutral-800 pl-4">
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-black text-neutral-600 uppercase tracking-tighter">Editor</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="switch-editor" class="sr-only peer">
-                        <div
-                            class="w-8 h-4 bg-neutral-800 peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-400 after:border-neutral-300 after:rounded-none after:h-3 after:w-[14px] after:transition-all peer-checked:bg-yellow-400 peer-checked:after:bg-black">
-                        </div>
-                    </label>
-                </div>
+            <div class="relative group">
+                <button
+                    class="bg-neutral-900 border border-neutral-800 px-4 py-2 text-xs font-black text-yellow-400 uppercase tracking-widest hover:border-yellow-400 transition-all">
+                    Painel de Controle ⚡
+                </button>
 
-                <div class="flex gap-2 text-neutral-400">
-                    <button id="btn-backup" class="btn-util" title="Backup Geral (Dados + Templates)">Exportar
-                        Config</button>
-                    <button id="btn-import" class="btn-util">Importar</button>
+                <div
+                    class="absolute right-0 mt-2 w-64 card shadow-2xl hidden group-hover:block z-50 border-yellow-400/20">
+                    <div class="p-4 space-y-4">
+                        <div class="flex justify-between items-center pb-2 border-b border-neutral-800">
+                            <span class="text-[10px] font-bold text-neutral-400 uppercase">Modo Editor</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="switch-editor" class="sr-only peer">
+                                <div
+                                    class="w-8 h-4 bg-neutral-800 rounded-none peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-500 after:rounded-none after:h-3 after:w-[14px] after:transition-all peer-checked:bg-yellow-400 peer-checked:after:bg-black">
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="space-y-2">
+                            <button id="btn-backup"
+                                class="w-full text-left p-2 bg-neutral-800 hover:bg-neutral-700 text-[10px] font-black uppercase text-white transition-all">
+                                Exportar Backup
+                            </button>
+                            <button id="btn-import"
+                                class="w-full text-left p-2 bg-neutral-800 hover:bg-neutral-700 text-[10px] font-black uppercase text-white transition-all">
+                                Importar Backup
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -89,7 +100,7 @@
                 <nav id="menu-modelos" class="flex flex-col gap-2"></nav>
             </aside>
 
-            <main class="lg:col-span-6 space-y-6">
+            <main class="lg:col-span-9 space-y-9">
                 <div id="formulario-container" class="card p-6 hidden relative">
                     <div id="badge-autosave" class="autosave-badge">SYSTEM READY // AUTOSAVED</div>
                     <h2 id="form-titulo"
@@ -116,16 +127,6 @@
                     </button>
                 </div>
             </main>
-
-            <aside class="lg:col-span-3">
-                <div class="card p-4 sticky top-8">
-                    <h2 class="section-title flex justify-between items-center">
-                        <span>📓 Notas Pessoais</span>
-                        <span id="label-operador-nota" class="text-yellow-500 font-mono lowercase"></span>
-                    </h2>
-                    <textarea id="bloco-notas" placeholder="Anotações rápidas..." class="textarea-buffer"></textarea>
-                </div>
-            </aside>
         </div>
     </div>
     <div id="modal-modelos" class="fixed inset-0 bg-black/90 flex items-center justify-center hidden z-50 p-4">
@@ -148,7 +149,7 @@
                 </div>
 
                 <div class="bg-neutral-900 p-4 border border-neutral-800">
-                    <label 
+                    <label
                         class="block text-[10px] font-bold text-neutral-500 mb-2 uppercase text-yellow-400">Configurar
                         Campos</label>
                     <div id="lista-campos-config" class="space-y-2 mb-4">
@@ -170,7 +171,7 @@
 
                 <button id="btn-salvar-procedimento"
                     class="w-full bg-yellow-400 text-black font-black py-3 uppercase tracking-widest text-xs hover:bg-yellow-300 transition-all">
-                    Salvar Procedimento Completo
+                    Salvar Procedimento
                 </button>
             </div>
         </div>
@@ -178,7 +179,7 @@
 
     <button id="btn-abrir-config-modelos"
         class="fixed bottom-4 left-4 bg-neutral-900 border border-neutral-800 p-3 rounded-full hover:border-yellow-400 transition-all z-40 text-xs text-yellow-400 font-mono hidden">
-        + NOVO PROCEDIMENTO
+        ADICIONAR PROCEDIMENTO
     </button>
 
     <script src="script.js"></script>
