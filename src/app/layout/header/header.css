@@ -1,0 +1,15 @@
+.bg-gray-800 {
+    background-color: #1a202c;
+}
+
+.text-white {
+    color: white;
+}
+
+input[type="text"] {
+    border: none;
+}
+
+button {
+    margin-left: 1rem;
+}
