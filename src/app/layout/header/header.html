@@ -19,9 +19,9 @@
     </div>
 
     <div class="flex items-center gap-6">
-        <div class="flex flex-col items-end border-r border-brand-gray pr-6">
+        <div class="flex flex-col items-end border-r border-brand-gray pr-6 gap-1">
             <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Tempo de Turno</span>
-            <div class="flex items-center gap-2 font-mono text-sm" [ngClass]="shiftStatus().color">
+            <div class="flex items-center gap-2 font-mono text-sm py-1 px-2 rounded-md border" [ngClass]="`text-${shiftStatus().color} bg-${shiftStatus().color}/20 border-${shiftStatus().color}`">
                 <span class="w-2 h-2 rounded-full animate-pulse bg-current"></span>
                 {{ remainingTime() }}
             </div>
@@ -55,7 +55,7 @@
                         </div>
                         }
                     </div>
-                    <a routerLink="/notifications" (click)="isNotificationsOpen.set(false)"
+                    <a (click)="goToNotifications()" (blur)="isNotificationsOpen.set(false)"
                         class="block p-3 text-center text-xs font-bold text-(--brand-primary) hover:bg-(--brand-primary) hover:text-black transition-all cursor-pointer">
                         Ver todas as notificações
                     </a>
@@ -74,7 +74,8 @@
                     </div>
                     <div
                         class="w-9 h-9 bg-(--brand-gray) rounded-full border border-(--brand-gray) flex items-center justify-center text-gray-400 group-hover:border-(--brand-primary) transition-all overflow-hidden">
-                        <img [src]="'https://api.dicebear.com/9.x/identicon/svg?seed=' + (user()?.name || '')" alt="avatar" />
+                        <img [src]="'https://api.dicebear.com/9.x/identicon/svg?seed=' + (user()?.name || '')"
+                            alt="avatar" />
                     </div>
                 </div>
 
@@ -82,7 +83,7 @@
                 <div
                     class="absolute right-0 mt-3 w-48 bg-(--brand-dark) border border-(--brand-gray) rounded-xl shadow-2xl py-2 animate-in fade-in slide-in-from-top-2 duration-200">
                     <button
-                        class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-(--brand-gray) hover:text-white transition-colors">
+                        (click)="router.navigate(['/profile'])" class="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-(--brand-gray) hover:text-white transition-colors">
                         <i class="pi pi-cog text-xs"></i>
                         Configurações
                     </button>

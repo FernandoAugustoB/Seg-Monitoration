@@ -1,26 +1,45 @@
-<aside class="w-64 h-full bg-(--brand-dark) border-r border-(--brand-gray) flex flex-col font-sans">
-    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        @for (item of navItems; track item.label) {
-        <a [routerLink]="item.route"
-            routerLinkActive="bg-(brand-primary)/10 text-(--brand-primary) border-(--brand-primary)"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-(--brand-gray) hover:text-white transition-all border-l-2 border-transparent group">
-            <i class="pi" [ngClass]="item.icon" class="text-lg group-hover:scale-110 transition-transform pi"></i>
-            <span class="text-sm font-medium">{{ item.label }}</span>
-        </a>
+<aside class="w-64 h-full bg-(--brand-dark) border-r border-(--brand-gray) flex flex-col font-sans select-none">
+
+    <nav class="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
+
+        @for (item of menuItems(); track item.label) {
+        <div>
+            @if (!item.children) {
+            <a [routerLink]="item.route"
+                routerLinkActive="bg-(--brand-primary)/10 text-(--brand-primary) !border-(--brand-primary)"
+                class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-400 hover:bg-(--brand-gray)/40 hover:text-white transition-all border-l-2 border-transparent group">
+                <i class="pi text-sm" [ngClass]="item.icon"></i>
+                <span class="text-xs font-medium">{{ item.label }}</span>
+            </a>
+            } @else {
+            <button (click)="toggleFolder(item)"
+                class="w-full flex items-center justify-between px-3 py-2 rounded-md text-gray-400 hover:bg-(--brand-gray)/40 hover:text-white transition-all border-l-2 border-transparent group cursor-pointer">
+                <div class="flex items-center gap-3">
+                    <i class="pi pi-chevron-right text-[8px] transition-transform" [class.rotate-90]="item.isOpen"></i>
+                    <i class="pi" [ngClass]="item.isOpen ? 'pi-folder-open' : 'pi-folder'"
+                        class="pi text-sm text-gray-500"></i>
+                    <span class="text-xs font-medium">{{ item.label }}</span>
+                </div>
+            </button>
+
+            @if (item.isOpen) {
+            <div class="ml-4 border-l border-(--brand-gray)/50 mt-0.5 animate-in slide-in-from-top-1 duration-150">
+                @for (sub of item.children; track sub.label) {
+                <a [routerLink]="sub.route" routerLinkActive="text-(--brand-primary) bg-(--brand-primary)/5"
+                    class="flex items-center gap-3 px-4 py-1.5 text-[11px] text-gray-500 hover:text-white hover:bg-(--brand-gray)/20 transition-all rounded-r-md ml-2 border-l-2 border-transparent">
+                    <i class="text-[10px] pi" [ngClass]="sub.icon"></i>
+                    {{ sub.label }}
+                </a>
+                }
+            </div>
+            }
+            }
+        </div>
         }
     </nav>
 
-    <div class="p-4 bg-(--brand-black)/40 border-t border-(--brand-gray)/50">
-        <div class="flex items-center gap-3 px-2">
-            <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-            <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Servidor Online</span>
-        </div>
-
-        @if (authService.currentUser().role === 'SUPERVISOR') {
-        <div class="mt-4 px-2 py-2 bg-(brand-primary)/5 border border-(brand-primary)/20 rounded-md">
-            <p class="text-[10px] text-(--brand-primary) font-bold leading-tight">MODO SUPERVISOR</p>
-            <p class="text-[9px] text-gray-400">Acesso total às permissões</p>
-        </div>
-        }
+    <div class="p-3 bg-(--brand-black)/40 border-t border-(--brand-gray)/50 flex items-center gap-2">
+        <div class="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+        <span class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Active Session</span>
     </div>
 </aside>

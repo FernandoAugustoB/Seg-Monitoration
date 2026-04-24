@@ -1,0 +1,135 @@
+<div class="space-y-6 font-sans">
+  
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-white">Gestão de Clientes</h1>
+    <div class="relative">
+      <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+      <input 
+        [(ngModel)]="searchQuery"
+        type="text" 
+        placeholder="Pesquisar cliente..." 
+        class="bg-(--brand-dark) border border-(--brand-gray) text-white text-sm rounded-lg pl-10 pr-4 py-2 w-80 focus:border-(--brand-primary) outline-none transition-all"
+      >
+    </div>
+  </div>
+
+  <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl overflow-hidden">
+    <table class="w-full text-left">
+      <thead class="bg-(--brand-black)/50 text-gray-400 text-[10px] uppercase tracking-widest border-b border-(--brand-gray)">
+        <tr>
+          <th class="px-6 py-4">Nome do Cliente</th>
+          <th class="px-6 py-4">Status</th>
+          <th class="px-6 py-4">Câmeras</th>
+          <th class="px-6 py-4">Cards Abertos</th>
+          <th class="px-6 py-4 text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-(--brand-gray)/50">
+        @for (client of filteredClients(); track client.id) {
+          <tr class="hover:bg-(--brand-gray)/20 transition-colors group">
+            <td class="px-6 py-4 font-medium text-gray-200">{{ client.name }}</td>
+            <td class="px-6 py-4">
+              <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-green-500/10 text-green-500 border border-green-500/20">
+                {{ client.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-400">{{ client.cameras.length }} unid.</td>
+            <td class="px-6 py-4 text-sm text-gray-400">{{ client.openCards.length }} ativos</td>
+            <td class="px-6 py-4 text-right">
+              <button (click)="openClientDetails(client)" class="text-(--brand-primary) hover:underline text-sm font-bold">
+                Ver Detalhes
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (showModal() && selectedClient()) {
+    <div class="fixed inset-0 z-60 flex items-center justify-center p-4">
+      <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" (click)="closeModal()"></div>
+      
+      <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col z-10 shadow-2xl">
+        <div class="p-6 border-b border-(--brand-gray) flex justify-between items-center bg-(--brand-black)/30">
+          <div>
+            <h2 class="text-xl font-bold text-white">{{ selectedClient().name }}</h2>
+            <p class="text-xs text-gray-500 mt-1 uppercase tracking-tighter">Ficha Técnica do Cliente</p>
+          </div>
+          <button (click)="closeModal()" class="text-gray-500 hover:text-white transition-colors">
+            <i class="pi pi-times text-xl"></i>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          <div class="space-y-6">
+            <section>
+              <h3 class="text-xs font-bold text-(--brand-primary) uppercase mb-3 tracking-widest">Descrição do Cliente</h3>
+              <p class="text-sm text-gray-300 leading-relaxed bg-(--brand-black) p-4 rounded-lg border border-(--brand-gray)/50">
+                {{ selectedClient().description }}
+              </p>
+            </section>
+
+            <section>
+              <h3 class="text-xs font-bold text-(--brand-primary) uppercase mb-3 tracking-widest">Câmeras e Situação</h3>
+              <div class="space-y-2">
+                @for (cam of selectedClient().cameras; track cam.name) {
+                  <div class="flex items-center justify-between p-3 bg-(--brand-black)/40 rounded-lg border border-(--brand-gray)/30">
+                    <span class="text-sm text-gray-300">{{ cam.name }}</span>
+                    <div class="flex items-center gap-2">
+                      @if (cam.issue) {
+                        <i class="pi pi-exclamation-triangle text-red-500 text-xs" [title]="cam.issue"></i>
+                      }
+                      <span [class]="cam.status === 'Online' ? 'text-green-500' : 'text-red-500'" class="text-[10px] font-bold uppercase">
+                        {{ cam.status }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+          </div>
+
+          <div class="space-y-6">
+            <section>
+              <h3 class="text-xs font-bold text-(--brand-primary) uppercase mb-3 tracking-widest">Cards Abertos</h3>
+              <div class="space-y-2">
+                @for (card of selectedClient().openCards; track card.id) {
+                  <div class="p-3 border-l-4 border-(--brand-primary) bg-(--brand-primary)/5 rounded-r-lg">
+                    <p class="text-xs font-bold text-white">{{ card.id }} - {{ card.title }}</p>
+                    <p class="text-[10px] text-gray-500 mt-1 italic">Urgência: {{ card.priority }}</p>
+                  </div>
+                } @empty {
+                  <p class="text-xs text-gray-600 italic">Nenhum card aberto no momento.</p>
+                }
+              </div>
+            </section>
+
+            <section>
+              <h3 class="text-xs font-bold text-(--brand-primary) uppercase mb-3 tracking-widest">Log de Operação (Últimos Eventos)</h3>
+              <div class="bg-(--brand-black)/60 rounded-lg p-4 space-y-3 max-h-48 overflow-y-auto border border-(--brand-gray)/50">
+                @for (log of selectedClient().operationLog; track log.date) {
+                  <div class="border-b border-(--brand-gray)/30 pb-2 last:border-0">
+                    <span class="text-[9px] text-gray-600 font-mono">{{ log.date }}</span>
+                    <p class="text-[11px] text-gray-400 mt-1">{{ log.event }}</p>
+                  </div>
+                }
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="p-6 bg-(--brand-black)/50 border-t border-(--brand-gray)">
+          <label class="block text-[10px] font-bold text-gray-500 uppercase mb-2">Comentários da Operação</label>
+          <div class="flex gap-3">
+            <input type="text" placeholder="Adicionar nota rápida sobre este cliente..." class="flex-1 bg-(--brand-dark) border border-(--brand-gray) rounded-lg px-4 py-2 text-sm text-white focus:border-(--brand-primary) outline-none transition-all">
+            <button class="bg-(--brand-gray) hover:bg-(--brand-primary) hover:text-black text-white px-4 rounded-lg transition-all">
+              <i class="pi pi-send"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

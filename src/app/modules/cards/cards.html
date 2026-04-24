@@ -1,0 +1,110 @@
+<div class="h-full flex flex-col space-y-6 font-sans">
+  
+  <div>
+    <h1 class="text-2xl font-bold text-white">Fluxo de Incidentes (Cards)</h1>
+    <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Gestão de ocorrências e triagem técnica</p>
+  </div>
+
+  <div class="flex-1 flex gap-6 overflow-x-auto pb-4 custom-scrollbar">
+    @for (col of columns(); track col.id) {
+      <div class="flex-1 min-w-75 flex flex-col bg-(--brand-black)/40 rounded-xl border border-(--brand-gray)/50">
+        <div class="p-4 border-b-2" [ngClass]="col.color">
+          <div class="flex justify-between items-center">
+            <h2 class="text-sm font-bold text-white uppercase">{{ col.title }}</h2>
+            <span class="text-[10px] bg-(--brand-gray) text-gray-400 px-2 py-0.5 rounded-full">
+              {{ getCardsByStatus(col.id).length }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex-1 p-3 space-y-3 overflow-y-auto">
+          @for (card of getCardsByStatus(col.id); track card.id) {
+            <div 
+              (click)="openCard(card)"
+              class="bg-(--brand-dark) border border-(--brand-gray) p-4 rounded-lg shadow-lg hover:border-(--brand-primary)/50 cursor-pointer transition-all group"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <span class="text-[9px] font-mono text-(--brand-primary) bg-(--brand-primary)/10 px-2 py-0.5 rounded">
+                  {{ card.id }}
+                </span>
+                <span [class.text-red-500]="card.priority === 'Crítica' || card.priority === 'Alta'" class="text-[10px] font-bold uppercase">
+                  {{ card.priority }}
+                </span>
+              </div>
+              
+              <h3 class="text-sm font-semibold text-gray-200 group-hover:text-white mb-4">{{ card.title }}</h3>
+              
+              <div class="flex justify-between items-center pt-3 border-t border-(--brand-gray)/30">
+                <div class="flex items-center gap-2 text-gray-500">
+                  <i class="pi pi-comments text-xs"></i>
+                  <span class="text-[10px]">{{ card.comments }}</span>
+                </div>
+                <div class="w-6 h-6 bg-(--brand-gray) rounded-full flex items-center justify-center border border-(--brand-gray)">
+                  <i class="pi pi-user text-[10px] text-gray-400"></i>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (showModal() && selectedCard()) {
+    <div class="fixed inset-0 z-80 flex items-center justify-center p-4">
+      <div class="fixed inset-0 bg-black/90 backdrop-blur-sm" (click)="showModal.set(false)"></div>
+      
+      <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-2xl w-full max-w-3xl overflow-hidden z-10 flex flex-col shadow-2xl">
+        <div class="p-6 border-b border-(--brand-gray) bg-(--brand-black)/40 flex justify-between items-start">
+          <div>
+            <div class="flex items-center gap-3 mb-1">
+               <span class="text-xs font-mono text-(--brand-primary)">{{ selectedCard().id }}</span>
+               <span class="text-[10px] text-gray-500">|</span>
+               <span class="text-[10px] text-gray-500 uppercase">Destinado a: {{ selectedCard().assignedTo }}</span>
+            </div>
+            <h2 class="text-xl font-bold text-white">{{ selectedCard().title }}</h2>
+          </div>
+          <button (click)="showModal.set(false)" class="text-gray-500 hover:text-white"><i class="pi pi-times"></i></button>
+        </div>
+
+        <div class="p-6 grid grid-cols-3 gap-6 overflow-y-auto max-h-[70vh]">
+          <div class="col-span-2 space-y-6">
+            <section>
+              <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-2">Descrição da Ocorrência</h4>
+              <p class="text-sm text-gray-300 bg-(--brand-black) p-4 rounded-lg border border-(--brand-gray)/50">
+                {{ selectedCard().description }}
+              </p>
+            </section>
+
+            <section>
+              <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-2">Comentários</h4>
+              <div class="space-y-3">
+                <div class="bg-(--brand-black)/40 p-3 rounded-lg border border-(--brand-gray)/20 text-xs text-gray-400">
+                  Relatado falha no DVR local. Aguardando técnico.
+                </div>
+                <input type="text" placeholder="Adicionar comentário..." class="w-full bg-(--brand-black) border border-(--brand-gray) rounded-lg px-4 py-2 text-xs text-white focus:border-(--brand-primary) outline-none">
+              </div>
+            </section>
+          </div>
+
+          <div class="space-y-6">
+            <div class="bg-(--brand-black)/40 p-4 rounded-xl border border-(--brand-gray)/30">
+              <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-3">Logs de Atividade</h4>
+              @for (log of selectedCard().logs; track log) {
+                <p class="text-[10px] text-gray-400 mb-2 border-l border-(--brand-primary) pl-2">{{ log }}</p>
+              }
+            </div>
+            
+            <div class="space-y-2">
+              <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-3">Nível de Urgência</h4>
+              <div [class.bg-red-500]="selectedCard().priority === 'Crítica'" 
+                   class="py-2 text-center rounded font-bold text-[10px] uppercase text-black bg-(--brand-primary)">
+                {{ selectedCard().priority }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { AuthService } from '../../services/auth-service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -8,8 +9,9 @@ import { AuthService } from '../../services/auth-service';
   imports: [CommonModule],
   templateUrl: './header.html'
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class Header implements OnInit, OnDestroy {
   authService = inject(AuthService);
+  router = inject(Router);
 
   user = computed(() => this.authService.currentUser());
   isSearchOpen = signal(false);
@@ -42,13 +44,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const diffInMs = limit.getTime() - now.getTime();
     const diffInMin = Math.floor(diffInMs / 60000);
 
-    if (diffInMin < 0) return { label: 'Extra', color: 'text-red-500' };
-    if (diffInMin <= 30) return { label: 'Fim de Turno', color: 'text-brand-primary' }; // Amarelo
-    return { label: 'Em Plantão', color: 'text-green-500' };
+    if (diffInMin < 0) return { label: 'Extra', color: 'red-500' };
+    if (diffInMin <= 30) return { label: 'Fim de Turno', color: 'yellow-500' }; // Amarelo
+    return { label: 'Em Plantão', color: 'green-500' };
   });
 
   remainingTime = computed(() => {
-    // Aqui você pode formatar o HH:mm:ss restante
     const now = this.currentTime();
     return now.toLocaleTimeString('pt-BR');
   });
@@ -82,5 +83,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   logout() {
     this.authService.logout();
+  }
+
+  goToNotifications() {
+    this.isNotificationsOpen.update(v => false);
+    this.router.navigate(['/notifications']);
   }
 }

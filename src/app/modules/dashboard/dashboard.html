@@ -1,1 +1,59 @@
-<p>dashboard works!</p>
+<div class="space-y-6 font-sans max-w-6xl mx-auto">
+  
+  <div class="flex justify-between items-end">
+    <div>
+      <h1 class="text-2xl font-bold text-white">Painel Operacional</h1>
+      <p class="text-gray-500 text-sm mt-1">Gestão de plantão e relatórios de ocorrência.</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <div class="lg:col-span-1 space-y-6">
+      <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl p-6">
+        <h2 class="text-sm font-bold text-(--brand-primary) uppercase tracking-wider mb-4 flex items-center gap-2">
+          <i class="pi pi-check-square"></i> Checklist de Procedimentos
+        </h2>
+        
+        <div class="space-y-4">
+          @for (task of tasks(); track task.id) {
+            <label class="flex items-start gap-3 p-3 rounded-lg border border-transparent hover:bg-(--brand-gray)/30 cursor-pointer transition-all group">
+              <input type="checkbox" [(ngModel)]="task.completed" class="mt-1 accent-(--brand-primary) w-4 h-4">
+              <div class="flex flex-col">
+                <span class="text-sm" [class.text-gray-500]="task.completed" [class.line-through]="task.completed">
+                  {{ task.label }}
+                </span>
+                <span class="text-[10px] font-bold text-gray-600 uppercase">{{ task.category }}</span>
+              </div>
+            </label>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl p-6">
+        <h2 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+          <i class="pi pi-sign-in text-(--brand-primary)"></i> Relatório de Início de Plantão
+        </h2>
+        <textarea 
+          [(ngModel)]="startShiftLog"
+          placeholder="Descreva o estado dos sistemas e clientes ao assumir o posto..."
+          class="w-full h-32 bg-(--brand-black) border border-(--brand-gray) rounded-lg p-4 text-sm text-gray-300 focus:border-(--brand-primary) outline-none transition-all resize-none"
+        ></textarea>
+      </div>
+
+      <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl p-6">
+        <h2 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+          <i class="pi pi-sign-out text-(--brand-primary)"></i> Relatório de Final de Plantão
+        </h2>
+        <textarea 
+          [(ngModel)]="endShiftLog"
+          placeholder="Descreva as principais ocorrências que ocorreram durante o plantão..."
+          class="w-full h-48 bg-(--brand-black) border border-(--brand-gray) rounded-lg p-4 text-sm text-gray-300 focus:border-(--brand-primary) outline-none transition-all resize-none"
+        ></textarea>
+      </div>
+    </div>
+
+  </div>
+</div>

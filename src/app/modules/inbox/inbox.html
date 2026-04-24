@@ -1,0 +1,78 @@
+<div class="h-[calc(100vh-120px)] flex bg-(--brand-dark) border border-(--brand-gray) rounded-2xl overflow-hidden font-sans shadow-2xl">
+  
+  <div class="w-80 border-r border-(--brand-gray) flex flex-col bg-(--brand-black)/20">
+    <div class="p-4 border-b border-(--brand-gray) flex justify-between items-center bg-(--brand-black)/40">
+      <h2 class="text-sm font-bold text-white uppercase tracking-widest">Inbox</h2>
+      
+      @if (authService.currentUser().role === 'SUPERVISOR') {
+        <button class="w-8 h-8 bg-(--brand-primary) text-black rounded-lg flex items-center justify-center hover:bg-yellow-600 transition-colors">
+          <i class="pi pi-plus text-xs"></i>
+        </button>
+      }
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+      @for (msg of messages(); track msg.id) {
+        <div 
+          (click)="selectMessage(msg)"
+          [class.bg-(--brand-primary)/5]="selectedMessage()?.id === msg.id"
+          [class.border-l-4]="!msg.read"
+          [class.border-(--brand-primary)]="!msg.read"
+          class="p-4 border-b border-(--brand-gray)/50 cursor-pointer hover:bg-(--brand-gray)/20 transition-all relative"
+        >
+          <div class="flex justify-between items-start mb-1">
+            <span class="text-[10px] font-bold text-gray-500 uppercase">{{ msg.tag }}</span>
+            <span class="text-[9px] text-gray-600">{{ msg.time }}</span>
+          </div>
+          <h3 class="text-xs font-bold truncate" [class.text-white]="!msg.read" [class.text-gray-400]="msg.read">
+            {{ msg.subject }}
+          </h3>
+          <p class="text-[11px] text-gray-500 truncate mt-1">{{ msg.sender }}</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="flex-1 flex flex-col bg-(--brand-black)/10">
+    @if (selectedMessage()) {
+      <div class="p-8 border-b border-(--brand-gray)/50">
+        <div class="flex justify-between items-start mb-6">
+          <div>
+            <h1 class="text-2xl font-bold text-white mb-2">{{ selectedMessage().subject }}</h1>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-(--brand-gray) rounded-full flex items-center justify-center border border-(--brand-gray)">
+                <i class="pi pi-user text-xs text-gray-400"></i>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-200">{{ selectedMessage().sender }}</p>
+                <p class="text-[10px] text-gray-500">Para: Todos os Operadores</p>
+              </div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-gray-500">{{ selectedMessage().date }}</span>
+          </div>
+        </div>
+
+        <div class="bg-(--brand-black)/40 border border-(--brand-gray)/30 rounded-xl p-6 min-h-50">
+          <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+            {{ selectedMessage().content }}
+          </p>
+        </div>
+      </div>
+
+      <div class="p-6 mt-auto flex justify-end">
+        <button class="flex items-center gap-2 px-6 py-2 bg-(--brand-gray) hover:bg-(--brand-primary) hover:text-black text-gray-300 rounded-lg text-xs font-bold transition-all uppercase tracking-widest">
+          <i class="pi pi-check"></i>
+          Confirmar Leitura
+        </button>
+      </div>
+
+    } @else {
+      <div class="flex-1 flex flex-col items-center justify-center text-gray-600">
+        <i class="pi pi-envelope text-4xl mb-4 opacity-20"></i>
+        <p class="text-sm">Selecione um comunicado para ler os detalhes.</p>
+      </div>
+    }
+  </div>
+</div>
