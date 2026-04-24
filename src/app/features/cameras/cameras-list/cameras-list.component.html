@@ -1,0 +1,116 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-4xl font-bold text-yellow-500 mb-2">Câmeras</h1>
+    <p class="text-slate-400">Monitorar câmeras dos clientes</p>
+  </div>
+
+  <!-- Filter and Search -->
+  <div class="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-6 space-y-3">
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-2">Filtrar por Cliente</label>
+      <select
+        [(ngModel)]="selectedClienteId"
+        (change)="search()"
+        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-yellow-500 transition"
+      >
+        <option value="">Todos os clientes</option>
+        <option *ngFor="let cliente of clientes" [value]="cliente.id">
+          {{ cliente.nome }}
+        </option>
+      </select>
+    </div>
+    <div class="flex gap-2">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="search()"
+        class="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 transition"
+        placeholder="Buscar por nome ou localização..."
+      />
+      <button
+        (click)="search()"
+        class="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-black font-semibold rounded-lg transition"
+      >
+        Buscar
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center text-slate-400">
+    <p>Carregando câmeras...</p>
+  </div>
+
+  <!-- Cameras List -->
+  <div *ngIf="!loading && cameras.length > 0" class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    <div
+      *ngFor="let camera of cameras"
+      (click)="selectCamera(camera)"
+      class="bg-slate-800 border border-slate-700 hover:border-yellow-600 rounded-lg p-4 cursor-pointer transition"
+    >
+      <div class="flex justify-between items-start mb-2">
+        <h3 class="text-lg font-semibold text-white">{{ camera.nome }}</h3>
+        <div [class]="'px-2 py-1 rounded text-xs font-semibold ' + getStatusColor(camera.status)">
+          {{ getStatusText(camera.status) }}
+        </div>
+      </div>
+      <p class="text-sm text-slate-400 mb-2">{{ camera.localizacao }}</p>
+      <p class="text-sm text-slate-400 mb-2">Cliente: {{ getClienteName(camera.clienteId) }}</p>
+      <div *ngIf="camera.problem" class="mt-3 p-2 bg-red-900/30 border border-red-600 rounded">
+        <p class="text-sm text-red-400">
+          <strong>Problema detectado:</strong> {{ camera.problem.descricao }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && cameras.length === 0" class="text-center text-slate-400 py-12">
+    <p class="text-lg">Nenhuma câmera encontrada</p>
+  </div>
+
+  <!-- Details Modal -->
+  <div *ngIf="showDetails && selectedCamera" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-lg max-w-2xl w-full">
+      <div class="bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-yellow-500">{{ selectedCamera.nome }}</h2>
+        <button
+          (click)="closeDetails()"
+          class="text-slate-400 hover:text-white text-2xl"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-slate-300">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm font-semibold text-slate-400 mb-1">Status</p>
+            <p [class]="'px-3 py-1 rounded inline-block text-sm font-semibold ' + getStatusColor(selectedCamera.status)">
+              {{ getStatusText(selectedCamera.status) }}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-400 mb-1">Cliente</p>
+            <p>{{ getClienteName(selectedCamera.clienteId) }}</p>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-slate-400 mb-1">Localização</p>
+          <p>{{ selectedCamera.localizacao }}</p>
+        </div>
+        <div *ngIf="selectedCamera.ultimaManutencao">
+          <p class="text-sm font-semibold text-slate-400 mb-1">Última Manutenção</p>
+          <p>{{ selectedCamera.ultimaManutencao | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        <div *ngIf="selectedCamera.problem" class="bg-red-900/30 border border-red-600 p-4 rounded">
+          <p class="text-sm font-semibold text-red-400 mb-2">🚨 Problema Detectado</p>
+          <p class="text-sm text-red-300 mb-1"><strong>Descrição:</strong> {{ selectedCamera.problem.descricao }}</p>
+          <p class="text-sm text-red-300 mb-1"><strong>Nível:</strong> {{ selectedCamera.problem.level | titlecase }}</p>
+          <p class="text-sm text-red-300"><strong>Data:</strong> {{ selectedCamera.problem.dataDeteccao | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

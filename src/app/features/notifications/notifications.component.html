@@ -1,0 +1,67 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6 flex justify-between items-center">
+    <div>
+      <h1 class="text-4xl font-bold text-yellow-500 mb-2">Notificações</h1>
+      <p class="text-slate-400">Você tem {{ getUnreadCount() }} notificações não lidas</p>
+    </div>
+    <button
+      *ngIf="getUnreadCount() > 0"
+      (click)="markAllAsRead()"
+      class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-black font-semibold rounded-lg transition"
+    >
+      Marcar todas como lidas
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center text-slate-400">
+    <p>Carregando notificações...</p>
+  </div>
+
+  <!-- Notifications List -->
+  <div *ngIf="!loading && notifications.length > 0" class="space-y-3">
+    <div
+      *ngFor="let notif of notifications"
+      [class]="'p-4 rounded-lg border ' + getNotificationColor(notif.tipo) + (notif.visualizado ? ' opacity-60' : ' border-solid')"
+    >
+      <div class="flex justify-between items-start gap-3">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-2xl">{{ getNotificationIcon(notif.tipo) }}</span>
+            <h3 class="text-lg font-semibold text-white">{{ notif.titulo }}</h3>
+            <span *ngIf="!notif.visualizado" class="px-2 py-1 bg-yellow-600 text-black text-xs font-semibold rounded">
+              Novo
+            </span>
+          </div>
+          <p class="text-slate-400 mb-2">{{ notif.descricao }}</p>
+          <p class="text-xs text-slate-500">
+            {{ notif.dataEnvio | date:'dd/MM/yyyy HH:mm' }}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button
+            *ngIf="!notif.visualizado"
+            (click)="markAsRead(notif.id)"
+            class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded transition"
+            title="Marcar como lido"
+          >
+            ✓
+          </button>
+          <button
+            (click)="deleteNotification(notif.id)"
+            class="px-3 py-1 bg-slate-700 hover:bg-red-800 text-white text-sm rounded transition"
+            title="Deletar"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && notifications.length === 0" class="text-center text-slate-400 py-12">
+    <p class="text-lg">Nenhuma notificação</p>
+  </div>
+</div>

@@ -1,0 +1,109 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-4xl font-bold text-yellow-500 mb-2">Clientes</h1>
+    <p class="text-slate-400">Gerenciar clientes da empresa</p>
+  </div>
+
+  <!-- Search -->
+  <div class="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-6">
+    <div class="flex gap-2">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="search()"
+        class="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 transition"
+        placeholder="Buscar por nome, email ou telefone..."
+      />
+      <button
+        (click)="search()"
+        class="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-black font-semibold rounded-lg transition"
+      >
+        Buscar
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center text-slate-400">
+    <p>Carregando clientes...</p>
+  </div>
+
+  <!-- Clients List -->
+  <div *ngIf="!loading && clientes.length > 0" class="grid gap-4">
+    <div
+      *ngFor="let cliente of clientes"
+      (click)="selectClient(cliente)"
+      class="bg-slate-800 border border-slate-700 hover:border-yellow-600 rounded-lg p-4 cursor-pointer transition"
+    >
+      <div class="flex justify-between items-start">
+        <div>
+          <h3 class="text-lg font-semibold text-white mb-1">{{ cliente.nome }}</h3>
+          <p class="text-sm text-slate-400 mb-2">{{ cliente.descricao }}</p>
+          <div class="flex gap-4 text-sm text-slate-400">
+            <span>📍 {{ cliente.endereco }}</span>
+            <span>📞 {{ cliente.telefone }}</span>
+            <span>📧 {{ cliente.email }}</span>
+          </div>
+        </div>
+        <div [class]="'px-3 py-1 rounded-lg border text-sm font-semibold ' + getStatusColor(cliente.status)">
+          {{ getStatusText(cliente.status) }}
+        </div>
+      </div>
+      <div class="mt-3 flex gap-4 text-sm text-slate-400">
+        <span>📹 {{ cliente.qtdCameras }} câmeras</span>
+        <span *ngIf="cliente.statusGeral === 'critico'" class="text-red-400">🚨 Status Crítico</span>
+        <span *ngIf="cliente.statusGeral === 'normal'" class="text-green-400">✓ Status Normal</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && clientes.length === 0" class="text-center text-slate-400 py-12">
+    <p class="text-lg">Nenhum cliente encontrado</p>
+  </div>
+
+  <!-- Details Modal -->
+  <div *ngIf="showDetails && selectedClient" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-lg max-w-2xl w-full max-h-96 overflow-auto">
+      <div class="sticky top-0 bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-yellow-500">{{ selectedClient.nome }}</h2>
+        <button
+          (click)="closeDetails()"
+          class="text-slate-400 hover:text-white text-2xl"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-slate-300">
+        <div>
+          <p class="text-sm font-semibold text-slate-400 mb-1">Descrição</p>
+          <p>{{ selectedClient.descricao }}</p>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm font-semibold text-slate-400 mb-1">Endereço</p>
+            <p>{{ selectedClient.endereco }}</p>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-400 mb-1">Email</p>
+            <p>{{ selectedClient.email }}</p>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-400 mb-1">Telefone</p>
+            <p>{{ selectedClient.telefone }}</p>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-400 mb-1">Câmeras</p>
+            <p>{{ selectedClient.qtdCameras }}</p>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-slate-400 mb-1">Procedimento Padrão</p>
+          <p class="bg-slate-700/50 p-3 rounded text-sm">{{ selectedClient.procedimentoPadrao }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

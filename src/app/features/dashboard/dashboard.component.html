@@ -1,0 +1,152 @@
+<div class="p-6 space-y-6">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-yellow-500 mb-2">Dashboard</h1>
+    <p class="text-slate-400">Bem-vindo, Usuário</p>
+  </div>
+
+  <!-- Shift Status -->
+  <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold text-white">Status do Plantão</h2>
+      <div *ngIf="currentShift" class="px-4 py-2 bg-green-900/30 border border-green-600 rounded-lg">
+        <p class="text-green-400 font-semibold">Plantão Atual</p>
+        <p class="text-sm text-green-300">{{ currentShift.tipo | titlecase }}</p>
+      </div>
+      <div *ngIf="!currentShift" class="px-4 py-2 bg-red-900/30 border border-red-600 rounded-lg">
+        <p class="text-red-400 font-semibold">Sem Plantão</p>
+      </div>
+    </div>
+
+    <!-- If no shift, show start form -->
+    <div *ngIf="!currentShift" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Descrição do Início</label>
+        <textarea
+          [(ngModel)]="descricaoInicio"
+          class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 transition"
+          placeholder="Descreva as condições no início do plantão..."
+          rows="3"
+        ></textarea>
+      </div>
+      <button
+        (click)="startShift()"
+        class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+      >
+        Iniciar Plantão
+      </button>
+    </div>
+
+    <!-- If shift is active, show tasks and end form -->
+    <div *ngIf="currentShift" class="space-y-6">
+      <!-- Progress -->
+      <div class="bg-slate-700/50 rounded-lg p-4">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-slate-300">Progresso: {{ getCompletedTasksCount() }}/{{ getTotalTasksCount() }}</span>
+          <span class="text-yellow-500 font-semibold">{{ (getCompletedTasksCount() / getTotalTasksCount() * 100) | number:'1.0-0' }}%</span>
+        </div>
+        <div class="w-full bg-slate-600 rounded-full h-2">
+          <div
+            class="bg-yellow-600 h-2 rounded-full transition-all duration-300"
+            [style.width.%]="getCompletedTasksCount() / getTotalTasksCount() * 100"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Tasks by Phase -->
+      <div class="space-y-4">
+        <!-- Início -->
+        <div class="bg-slate-700/50 rounded-lg p-4 border-l-4 border-blue-500">
+          <h3 class="font-bold text-blue-400 mb-3">Tarefas de Início</h3>
+          <div class="space-y-2">
+            <div *ngFor="let task of getTasksByFase('inicio')" class="flex items-center space-x-3 p-2 bg-slate-600/50 rounded">
+              <input
+                type="checkbox"
+                [checked]="task.status === 'concluido'"
+                (change)="completeTask(task.id)"
+                class="w-5 h-5 accent-yellow-500 cursor-pointer"
+              />
+              <div>
+                <p class="font-medium text-white">{{ task.nome }}</p>
+                <p class="text-sm text-slate-400">{{ task.descricao }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meio -->
+        <div class="bg-slate-700/50 rounded-lg p-4 border-l-4 border-yellow-500">
+          <h3 class="font-bold text-yellow-400 mb-3">Tarefas do Meio</h3>
+          <div class="space-y-2">
+            <div *ngFor="let task of getTasksByFase('meio')" class="flex items-center space-x-3 p-2 bg-slate-600/50 rounded">
+              <input
+                type="checkbox"
+                [checked]="task.status === 'concluido'"
+                (change)="completeTask(task.id)"
+                class="w-5 h-5 accent-yellow-500 cursor-pointer"
+              />
+              <div>
+                <p class="font-medium text-white">{{ task.nome }}</p>
+                <p class="text-sm text-slate-400">{{ task.descricao }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Final -->
+        <div class="bg-slate-700/50 rounded-lg p-4 border-l-4 border-red-500">
+          <h3 class="font-bold text-red-400 mb-3">Tarefas de Final</h3>
+          <div class="space-y-2">
+            <div *ngFor="let task of getTasksByFase('final')" class="flex items-center space-x-3 p-2 bg-slate-600/50 rounded">
+              <input
+                type="checkbox"
+                [checked]="task.status === 'concluido'"
+                (change)="completeTask(task.id)"
+                class="w-5 h-5 accent-yellow-500 cursor-pointer"
+              />
+              <div>
+                <p class="font-medium text-white">{{ task.nome }}</p>
+                <p class="text-sm text-slate-400">{{ task.descricao }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- End Shift Form -->
+      <button
+        *ngIf="!showEndForm"
+        (click)="showEndForm = true"
+        class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+      >
+        Finalizar Plantão
+      </button>
+
+      <div *ngIf="showEndForm" class="space-y-4 bg-slate-700/50 p-4 rounded-lg border border-red-600">
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Descrição do Final</label>
+          <textarea
+            [(ngModel)]="descricaoFim"
+            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 transition"
+            placeholder="Descreva as condições no final do plantão..."
+            rows="3"
+          ></textarea>
+        </div>
+        <div class="flex space-x-3">
+          <button
+            (click)="endShift()"
+            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+          >
+            Confirmar
+          </button>
+          <button
+            (click)="showEndForm = false"
+            class="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

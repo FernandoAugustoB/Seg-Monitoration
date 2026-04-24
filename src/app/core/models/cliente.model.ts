@@ -1,24 +1,18 @@
-export interface Camera {
-  id: string;
-  nome: string;
-  status: 'online' | 'alerta' | 'offline';
-  ultimaManutencao?: Date;
-}
-
-export interface Card {
-  id: string;
-  titulo: string;
-  status: 'aberto' | 'em_andamento' | 'concluido';
-  prioridade: 'baixa' | 'media' | 'alta';
-}
+export type ClienteStatus = 'active' | 'inactive';
 
 export interface Cliente {
-  id: number;
+  id: string;
   nome: string;
+  descricao: string;
   endereco: string;
+  telefone: string;
+  email: string;
+  status: ClienteStatus;
   qtdCameras: number;
   statusGeral: 'normal' | 'critico';
-  cameras: Camera[];
-  cardsAtivos: Card[];
+  cameras?: string[]; // Camera IDs
+  cardsAtivos?: string[]; // Card IDs
   procedimentoPadrao: string;
+  criadoEm: Date;
+  atualizadoEm: Date;
 }

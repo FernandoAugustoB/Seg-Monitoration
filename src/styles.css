@@ -1,3 +1,42 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import url('https://rsms.me/inter/inter.css');
 @import 'tailwindcss';
+
+/* Global Styles */
+* {
+  font-family: 'Inter', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #000000 0%, #1a1a2e 100%);
+  color: #e2e8f0;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #fbbf24;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b;
+}
+
+/* Selection color */
+::selection {
+  background-color: #fbbf24;
+  color: #000000;
+}
