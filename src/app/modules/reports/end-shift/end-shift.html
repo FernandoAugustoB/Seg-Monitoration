@@ -1,1 +1,62 @@
-<p>end-shift works!</p>
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 font-sans">
+  
+  <div class="space-y-6">
+    <!-- Configurações Base -->
+    <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl p-6">
+      <h2 class="text-sm font-bold text-white uppercase tracking-widest mb-4">Informações de Passagem</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label class="text-[10px] font-bold text-gray-500 uppercase">Tático</label>
+          <input [(ngModel)]="tatico" class="w-full bg-(--brand-black) border border-(--brand-gray) rounded p-2 text-xs text-white">
+        </div>
+        <div class="space-y-1">
+          <label class="text-[10px] font-bold text-gray-500 uppercase">Limpeza da Base</label>
+          <input [(ngModel)]="limpezaBase" class="w-full bg-(--brand-black) border border-(--brand-gray) rounded p-2 text-xs text-white">
+        </div>
+      </div>
+      <div class="mt-4 space-y-1">
+        <label class="text-[10px] font-bold text-gray-500 uppercase">Relato do Plantão</label>
+        <textarea [(ngModel)]="infosPlantao" class="w-full h-24 bg-(--brand-black) border border-(--brand-gray) rounded p-3 text-xs text-white resize-none"></textarea>
+      </div>
+    </div>
+
+    <!-- Gestão de Categorias -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Exemplo para Bateria Fraca -->
+      <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl p-4">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-[10px] font-bold text-white uppercase tracking-widest">Bateria Fraca</h3>
+          <button (click)="addItem('bateriaFraca')" class="text-brand-primary hover:text-white"><i class="pi pi-plus-circle"></i></button>
+        </div>
+        <div class="space-y-2">
+          @for (item of qthCategories().bateriaFraca; track $index) {
+            <input [(ngModel)]="qthCategories().bateriaFraca[$index]" class="w-full bg-(--brand-black) border border-(--brand-gray)/50 rounded px-2 py-1.5 text-[11px] text-gray-300">
+          }
+        </div>
+      </div>
+
+      <!-- Repetir estrutura para Oscilação, Disparos, etc. -->
+      <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl p-4 opacity-70">
+        <p class="text-[10px] text-gray-500 italic">As outras categorias seguem o mesmo padrão de inputs dinâmicos...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview WhatsApp -->
+  <div class="sticky top-6">
+    <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl p-6 h-full flex flex-col shadow-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+          <i class="pi pi-whatsapp text-green-500"></i> Relatório Final de Plantão
+        </h3>
+        <button (click)="copyReport()" class="bg-(--brand-primary) text-black px-4 py-2 rounded-lg text-xs font-bold hover:bg-yellow-600 transition-all">
+          Copiar Relatório
+        </button>
+      </div>
+
+      <div class="flex-1 bg-[#0b141a] rounded-lg p-5 font-mono text-xs text-[#e9edef] whitespace-pre-wrap border border-(--brand-gray)/30 max-h-[600px] overflow-y-auto">
+        {{ generatedText() }}
+      </div>
+    </div>
+  </div>
+</div>

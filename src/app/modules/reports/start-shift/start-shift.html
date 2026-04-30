@@ -1,1 +1,75 @@
-<p>start-shift works!</p>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 font-sans">
+  
+  <!-- Formulário de Entrada -->
+  <div class="space-y-6">
+    <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl p-6">
+      <h2 class="text-sm font-bold text-white uppercase tracking-widest mb-6 border-b border-(--brand-gray) pb-2">Configuração Geral</h2>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-gray-500 uppercase">Nome do Tático</label>
+          <input [(ngModel)]="tatico" class="w-full bg-(--brand-black) border border-(--brand-gray) rounded-lg p-2 text-sm text-white focus:border-(--brand-primary) outline-none">
+        </div>
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-gray-500 uppercase">Volume (%)</label>
+          <input type="number" [(ngModel)]="volume" class="w-full bg-(--brand-black) border border-(--brand-gray) rounded-lg p-2 text-sm text-white focus:border-(--brand-primary) outline-none">
+        </div>
+      </div>
+
+      <div class="flex gap-6 mt-6">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" [(ngModel)]="sistemaOk" class="w-4 h-4 accent-(--brand-primary)">
+          <span class="text-xs text-gray-300">Sistema OK</span>
+        </label>
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" [(ngModel)]="telefoneOk" class="w-4 h-4 accent-(--brand-primary)">
+          <span class="text-xs text-gray-300">Telefone OK</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Lista de Edição de Clientes S/C -->
+    <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-widest">Clientes Sem Comunicação</h2>
+        <button class="text-(--brand-primary) text-xs font-bold hover:underline">+ Adicionar</button>
+      </div>
+
+      <div class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+        @for (cliente of clientesSemComunicacao(); track $index) {
+          <div class="bg-(--brand-black) border border-(--brand-gray)/50 p-3 rounded-lg relative group">
+            <button (click)="removeCliente($index)" class="absolute top-2 right-2 text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+              <i class="pi pi-trash text-xs"></i>
+            </button>
+            <p class="text-xs font-bold text-(--brand-primary)">{{ cliente.nome }}</p>
+            <p class="text-[10px] text-gray-500 italic mt-1">S/C: {{ cliente.sc }}</p>
+            <p class="text-[10px] text-gray-400 mt-1 uppercase">{{ cliente.atendimento }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview do Resultado (Estilo WhatsApp) -->
+  <div class="space-y-4">
+    <div class="bg-(--brand-dark) border border-(--brand-gray) rounded-xl p-6 h-full flex flex-col">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+          <i class="pi pi-whatsapp text-green-500"></i> Preview do Relatório
+        </h2>
+        <button (click)="copyToClipboard()" class="bg-(--brand-primary) text-black px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-yellow-600 transition-all">
+          Copiar Texto
+        </button>
+      </div>
+
+      <div class="flex-1 bg-[#0b141a] rounded-lg p-4 font-mono text-xs text-[#e9edef] whitespace-pre-wrap border border-(--brand-gray)/30 overflow-y-auto">
+        {{ generatedText() }}
+      </div>
+      
+      <p class="text-[10px] text-gray-600 mt-4 italic">
+        * Este texto será copiado exatamente com a formatação de negritos (*) para o WhatsApp.
+      </p>
+    </div>
+  </div>
+
+</div>
